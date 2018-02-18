@@ -5,9 +5,14 @@ import(
   "os/exec"
 )
 
-func isExecutableInstalled(name string) bool {
+func ensureExecutableInstalled(name string) error {
   _, err := exec.LookPath(name)
-  return err == nil
+
+  if err !=nil {
+    return fmt.Errorf("Could not find %s executable, is it installed?", name)
+  }
+
+  return nil
 }
 
 func runExecutable(executable string, args ...string) error {

@@ -1,7 +1,7 @@
 package publish
 
 type SourceToImageGateway interface {
-  Installed() bool
+  EnsureInstalled() error
   Build(dir string, image string, tag string) error
 }
 
@@ -9,8 +9,8 @@ type sourceToImageGateway struct {
 
 }
 
-func (g *sourceToImageGateway) Installed() bool {
-  return isExecutableInstalled("s2i")
+func (g *sourceToImageGateway) EnsureInstalled() error {
+  return ensureExecutableInstalled("s2i")
 }
 
 func (g *sourceToImageGateway) Build(dir string, image string, tag string) error {
