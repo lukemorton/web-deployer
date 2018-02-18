@@ -4,7 +4,7 @@ build:
 
 test: build
 	exec $(GOPATH)/bin/web-deployer
-	exec $(GOPATH)/bin/web-deployer publish internal/fixtures/ruby
+	exec $(GOPATH)/bin/web-deployer publish --k8s-project doorman-1200 internal/fixtures/ruby
 
 charts/dist:
 	mkdir -p charts/dist

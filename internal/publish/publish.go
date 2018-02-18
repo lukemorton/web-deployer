@@ -1,6 +1,7 @@
 package publish
 
 import(
+  "fmt"
   "path/filepath"
 )
 
@@ -16,13 +17,25 @@ func NewPublisher() *publisher {
   }
 }
 
-func (p *publisher) Publish(dir string) (err error) {
+func (p *publisher) Publish(project string, dir string) (err error) {
   err = p.validateExecutablesExist()
   if err != nil {
     return err
   }
 
-  err = p.buildImage(dir)
+  appName, err := appNameFromDir(dir)
+	if err != nil {
+		return err
+	}
+
+  repo := fmt.Sprintf("gcr.io/%s/%s", project, appName)
+
+  err = p.buildImage(dir, repo)
+  if err != nil {
+    return err
+  }
+
+  err = p.pushImage(repo)
   if err != nil {
     return err
   }
@@ -44,13 +57,17 @@ func (p *publisher) validateExecutablesExist() (err error) {
   return nil
 }
 
-func (p *publisher) buildImage(dir string) (err error) {
-  appName, err := appNameFromDir(dir)
+func (p *publisher) buildImage(dir string, repo string) (err error) {
+  err = p.sourceToImageGateway.Build(dir, "centos/ruby-24-centos7", repo)
 	if err != nil {
 		return err
 	}
 
-  err = p.sourceToImageGateway.Build(dir, "centos/ruby-24-centos7", appName)
+  return nil
+}
+
+func (p *publisher) pushImage(repo string) (err error) {
+  err = p.gcloudGateway.PushImage(repo)
 	if err != nil {
 		return err
 	}
