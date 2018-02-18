@@ -1,10 +1,9 @@
 package main
 
 import (
-	"os"
 	"github.com/spf13/cobra"
+	"os"
 )
-
 
 var globalUsage = `Web Deployer for Kubernetes.
 
