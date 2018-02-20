@@ -16,13 +16,13 @@ func NewPublisher() *publisher {
 	}
 }
 
-func (p *publisher) Publish(project string, name string, dir string) (err error) {
+func (p *publisher) Publish(project string, name string, version string, dir string) (err error) {
 	err = p.validateExecutablesExist()
 	if err != nil {
 		return err
 	}
 
-	repo := fmt.Sprintf("gcr.io/%s/%s", project, name)
+	repo := fmt.Sprintf("gcr.io/%s/%s:%s", project, name, version)
 
 	err = p.buildImage(dir, repo)
 	if err != nil {

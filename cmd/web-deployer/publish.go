@@ -17,12 +17,13 @@ var publishUsage = `Publish an image of your application.
 In order to push your image to gcr.io run the following command. <dir> must
 contain a web-deployer.yml file.
 
-  web-deployer publish <dir> <tag>
+  web-deployer publish <dir> <version>
 `
 
 type publishRunner struct {
 	dir        string
 	app        string
+	version    string
 	k8sProject string
 	out        io.Writer
 }
@@ -31,13 +32,13 @@ func newPublishCmd(out io.Writer) *cobra.Command {
 	runner := &publishRunner{out: out}
 
 	cmd := &cobra.Command{
-		Use:          "publish <app>",
+		Use:          "publish <app> <version>",
 		Short:        "Publish an image of your application.",
 		Long:         publishUsage,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				return errors.New("you must pass <app>")
+			if len(args) != 2 {
+				return errors.New("you must pass <app> and <version>")
 			}
 
 			dir, err := os.Getwd()
@@ -47,6 +48,7 @@ func newPublishCmd(out io.Writer) *cobra.Command {
 
 			runner.dir = dir
 			runner.app = args[0]
+			runner.version = args[1]
 			return runner.run()
 		},
 	}
@@ -74,7 +76,7 @@ func (runner *publishRunner) run() error  {
 
 	fmt.Fprintf(runner.out, "Publishing...")
 
-	err = publish.NewPublisher().Publish(cfg.Kubernetes.Project, appCfg.Name, runner.dir)
+	err = publish.NewPublisher().Publish(cfg.Kubernetes.Project, appCfg.Name, runner.version, runner.dir)
 	if err != nil {
 		fmt.Fprintf(runner.out, "\n")
 		return err
