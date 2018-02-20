@@ -1,0 +1,20 @@
+k8s:
+  project: doorman-1200
+  zone: europe-west2-a
+  cluster: ruby-sample-app-cluster
+
+apps:
+  staging:
+    name: ruby-sample-app-staging
+    hosts:
+      - ruby-sample-app-staging.local
+    charts:
+      - gcloud-sqlproxy:
+          cloudsql.instance: staging
+  production:
+    name: ruby-sample-app-production
+    hosts:
+      - ruby-sample-app-production.local
+    charts:
+      - gcloud-sqlproxy:
+          cloudsql.instance: production

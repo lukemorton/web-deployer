@@ -7,14 +7,16 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/lukemorton/web-deployer/internal/config"
 	"github.com/lukemorton/web-deployer/internal/publish"
 )
 
 var publishUsage = `Publish an image of your application.
 
-In order to push your image to gcr.io you should pass project:
+In order to push your image to gcr.io run the following command. <dir> must
+contain a web-deployer.yml file.
 
-  web-deployer publish --k8s-project <project> <dir>
+  web-deployer publish <dir>
 `
 
 type publishRunner struct {
@@ -41,19 +43,24 @@ func newPublishCmd(out io.Writer) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&runner.k8sProject, "k8s-project", "", "Kubernetes project to deploy to")
 	return cmd
 }
 
-func (runner *publishRunner) run() error {
-	if len(runner.k8sProject) == 0 {
+func (runner *publishRunner) run() error  {
+	cfg, err := config.Discover(runner.dir)
+	if err != nil {
 		fmt.Fprintf(runner.out, "\n")
-		return errors.New("Please specify a Kubernetes project with --k8s-project")
+		return errors.New("Could not discover web-deployer.yml")
+	}
+
+	if len(cfg.Kubernetes.Project) == 0 {
+		fmt.Fprintf(runner.out, "\n")
+		return errors.New("Please specify a Kubernetes project in your web-deployer.yml")
 	}
 
 	fmt.Fprintf(runner.out, "Publishing...")
 
-	err := publish.NewPublisher().Publish(runner.k8sProject, runner.dir)
+	err = publish.NewPublisher().Publish(cfg.Kubernetes.Project, runner.dir)
 	if err != nil {
 		fmt.Fprintf(runner.out, "\n")
 		return err
