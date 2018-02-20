@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -16,11 +17,12 @@ var publishUsage = `Publish an image of your application.
 In order to push your image to gcr.io run the following command. <dir> must
 contain a web-deployer.yml file.
 
-  web-deployer publish <dir>
+  web-deployer publish <dir> <tag>
 `
 
 type publishRunner struct {
 	dir        string
+	app        string
 	k8sProject string
 	out        io.Writer
 }
@@ -29,16 +31,22 @@ func newPublishCmd(out io.Writer) *cobra.Command {
 	runner := &publishRunner{out: out}
 
 	cmd := &cobra.Command{
-		Use:          "publish <dir>",
+		Use:          "publish <app>",
 		Short:        "Publish an image of your application.",
 		Long:         publishUsage,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
-				return errors.New("you must pass <dir>")
+				return errors.New("you must pass <app>")
 			}
 
-			runner.dir = args[0]
+			dir, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+
+			runner.dir = dir
+			runner.app = args[0]
 			return runner.run()
 		},
 	}
@@ -53,6 +61,12 @@ func (runner *publishRunner) run() error  {
 		return errors.New("Could not discover web-deployer.yml")
 	}
 
+	appCfg, appIsDefined := cfg.Apps[runner.app]
+	if appIsDefined == false {
+		fmt.Fprintf(runner.out, "\n")
+		return fmt.Errorf("Did not find `%s` app defined in web-deployer.yml", runner.app)
+	}
+
 	if len(cfg.Kubernetes.Project) == 0 {
 		fmt.Fprintf(runner.out, "\n")
 		return errors.New("Please specify a Kubernetes project in your web-deployer.yml")
@@ -60,7 +74,7 @@ func (runner *publishRunner) run() error  {
 
 	fmt.Fprintf(runner.out, "Publishing...")
 
-	err = publish.NewPublisher().Publish(cfg.Kubernetes.Project, runner.dir)
+	err = publish.NewPublisher().Publish(cfg.Kubernetes.Project, appCfg.Name, runner.dir)
 	if err != nil {
 		fmt.Fprintf(runner.out, "\n")
 		return err

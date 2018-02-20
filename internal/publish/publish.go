@@ -2,7 +2,6 @@ package publish
 
 import (
 	"fmt"
-	"path/filepath"
 )
 
 type publisher struct {
@@ -17,18 +16,13 @@ func NewPublisher() *publisher {
 	}
 }
 
-func (p *publisher) Publish(project string, dir string) (err error) {
+func (p *publisher) Publish(project string, name string, dir string) (err error) {
 	err = p.validateExecutablesExist()
 	if err != nil {
 		return err
 	}
 
-	appName, err := appNameFromDir(dir)
-	if err != nil {
-		return err
-	}
-
-	repo := fmt.Sprintf("gcr.io/%s/%s", project, appName)
+	repo := fmt.Sprintf("gcr.io/%s/%s", project, name)
 
 	err = p.buildImage(dir, repo)
 	if err != nil {
@@ -73,14 +67,4 @@ func (p *publisher) pushImage(repo string) (err error) {
 	}
 
 	return nil
-}
-
-func appNameFromDir(dir string) (string, error) {
-	path, err := filepath.Abs(dir)
-
-	if err != nil {
-		return path, err
-	}
-
-	return filepath.Base(path), nil
 }

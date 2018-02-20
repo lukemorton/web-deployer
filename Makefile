@@ -4,7 +4,7 @@ build:
 
 test: build
 	exec $(GOPATH)/bin/web-deployer
-	exec $(GOPATH)/bin/web-deployer publish internal/fixtures/ruby
+	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer publish staging v1
 
 charts/dist:
 	mkdir -p charts/dist
