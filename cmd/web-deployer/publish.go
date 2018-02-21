@@ -49,7 +49,12 @@ func newPublishCmd(out io.Writer) *cobra.Command {
 			runner.dir = dir
 			runner.app = args[0]
 			runner.version = args[1]
-			return runner.run()
+
+			err = runner.run()
+			if err != nil {
+				fmt.Fprintf(runner.out, "\n")
+			}
+			return err
 		},
 	}
 
@@ -59,18 +64,15 @@ func newPublishCmd(out io.Writer) *cobra.Command {
 func (runner *publishRunner) run() error  {
 	cfg, err := config.Discover(runner.dir)
 	if err != nil {
-		fmt.Fprintf(runner.out, "\n")
-		return errors.New("Could not discover web-deployer.yml")
+		return fmt.Errorf("Could not discover web-deployer.yml in %s", runner.dir)
 	}
 
 	appCfg, appIsDefined := cfg.Apps[runner.app]
 	if appIsDefined == false {
-		fmt.Fprintf(runner.out, "\n")
 		return fmt.Errorf("Did not find `%s` app defined in web-deployer.yml", runner.app)
 	}
 
 	if len(cfg.Kubernetes.Project) == 0 {
-		fmt.Fprintf(runner.out, "\n")
 		return errors.New("Please specify a Kubernetes project in your web-deployer.yml")
 	}
 
@@ -78,7 +80,6 @@ func (runner *publishRunner) run() error  {
 
 	err = publish.NewPublisher().Publish(cfg.Kubernetes.Project, appCfg.Name, runner.version, runner.dir)
 	if err != nil {
-		fmt.Fprintf(runner.out, "\n")
 		return err
 	}
 
