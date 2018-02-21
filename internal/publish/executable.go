@@ -23,3 +23,12 @@ func runExecutable(executable string, args ...string) error {
 
 	return nil
 }
+
+func runExecutableAndReturnOutput(executable string, args ...string) ([]byte, error) {
+	out, err := exec.Command(executable, args...).CombinedOutput()
+	if err != nil {
+		return out, fmt.Errorf("%s", out)
+	}
+
+	return out, nil
+}

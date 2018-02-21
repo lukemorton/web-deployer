@@ -22,14 +22,20 @@ func (p *publisher) Publish(project string, name string, version string, dir str
 		return err
 	}
 
-	repo := fmt.Sprintf("gcr.io/%s/%s:%s", project, name, version)
+	repo := fmt.Sprintf("gcr.io/%s/%s", project, name)
+	fullyQualifiedRepo := fmt.Sprintf("gcr.io/%s/%s:%s", project, name, version)
 
-	err = p.buildImage(dir, repo)
+	err = p.validateImageDoesntExist(repo, version)
 	if err != nil {
 		return err
 	}
 
-	err = p.pushImage(repo)
+	err = p.buildImage(dir, fullyQualifiedRepo)
+	if err != nil {
+		return err
+	}
+
+	err = p.pushImage(fullyQualifiedRepo)
 	if err != nil {
 		return err
 	}
@@ -46,6 +52,20 @@ func (p *publisher) validateExecutablesExist() (err error) {
 	err = p.gcloudGateway.EnsureInstalled()
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (p *publisher) validateImageDoesntExist(repo string, version string) error {
+	exists, err := p.gcloudGateway.ImageTagExists(repo, version)
+
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		return fmt.Errorf("Repository %s already has tag %s", repo, version)
 	}
 
 	return nil
