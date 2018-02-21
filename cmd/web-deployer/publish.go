@@ -12,7 +12,7 @@ import (
 	"github.com/lukemorton/web-deployer/internal/publish"
 )
 
-var publishUsage = `Publish an image of your application.
+var publishUsage = `Publish a version of your application.
 
 In order to push your image to gcr.io run the following command. <dir> must
 contain a web-deployer.yml file.
@@ -33,7 +33,7 @@ func newPublishCmd(out io.Writer) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:          "publish <app> <version>",
-		Short:        "Publish an image of your application.",
+		Short:        "Publish a version of your application.",
 		Long:         publishUsage,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
