@@ -1,18 +1,18 @@
 package config
 
 type Config struct {
-  Kubernetes KubernetesConfig `yaml:"k8s"`
-  Apps       map[string]AppConfig
+	Kubernetes KubernetesConfig `yaml:"k8s"`
+	Apps       map[string]AppConfig
 }
 
 type KubernetesConfig struct {
-  Project string
-  Zone    string
-  Cluster string
+	Project string
+	Zone    string
+	Cluster string
 }
 
 type AppConfig struct {
-  Name   string
-  Hosts  []string
-  Charts []map[string]map[string]string
+	Name   string
+	Hosts  []string
+	Charts []map[string]map[string]string
 }

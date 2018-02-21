@@ -1,6 +1,6 @@
 package publish
 
-import(
+import (
 	"github.com/stretchr/testify/mock"
 )
 
@@ -14,6 +14,6 @@ func (g *mockSourceToImageGateway) EnsureInstalled() error {
 }
 
 func (g *mockSourceToImageGateway) Build(dir string, image string, tag string) error {
-  args := g.Called(dir, image, tag)
+	args := g.Called(dir, image, tag)
 	return args.Error(0)
 }

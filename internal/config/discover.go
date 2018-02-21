@@ -1,9 +1,9 @@
 package config
 
-import(
-  "path"
+import (
+	"path"
 )
 
 func Discover(dir string) (Config, error) {
-  return ReadFile(path.Join(dir, "web-deployer.yml"))
+	return ReadFile(path.Join(dir, "web-deployer.yml"))
 }

@@ -1,6 +1,6 @@
 package publish
 
-import(
+import (
 	"strings"
 )
 

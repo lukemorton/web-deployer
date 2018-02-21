@@ -61,7 +61,7 @@ func newPublishCmd(out io.Writer) *cobra.Command {
 	return cmd
 }
 
-func (runner *publishRunner) run() error  {
+func (runner *publishRunner) run() error {
 	cfg, err := config.Discover(runner.dir)
 	if err != nil {
 		return fmt.Errorf("Could not discover web-deployer.yml in %s", runner.dir)
