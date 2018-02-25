@@ -1,8 +1,11 @@
 package main
 
 import (
-	"github.com/spf13/cobra"
+	"io"
 	"os"
+
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 var globalUsage = `Web Deployer for Kubernetes.
@@ -21,6 +24,10 @@ Common commands:
 	- web-deployer deploy:    Deploy a version of your application
 `
 
+var (
+	verbose = false
+)
+
 func newRootCmd(args []string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:          "web-deployer",
@@ -29,12 +36,14 @@ func newRootCmd(args []string) *cobra.Command {
 		SilenceUsage: true,
 	}
 
-	out := cmd.OutOrStdout()
+	logger := createLogger(cmd.OutOrStdout())
 
 	cmd.AddCommand(
-		newPublishCmd(out),
+		newPublishCmd(logger),
+		newDeployCmd(logger),
 	)
 
+	cmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 	return cmd
 }
 
@@ -43,4 +52,15 @@ func main() {
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
+}
+
+func createLogger(out io.Writer) logrus.FieldLogger {
+	log := logrus.New()
+	log.Out = out
+
+	if verbose {
+		log.Level = logrus.DebugLevel
+	}
+
+	return log
 }

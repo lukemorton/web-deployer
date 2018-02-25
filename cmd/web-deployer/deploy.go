@@ -2,17 +2,17 @@ package main
 
 import (
 	"errors"
-	"fmt"
-	"io"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/lukemorton/web-deployer/internal/config"
 	"github.com/lukemorton/web-deployer/internal/deploy"
 )
 
-var deployUsage = `Deploy a version of your application.
+var (
+	deployUsage = `Deploy a version of your application.
 
 In order to deploy your image to gcr.io run the following command. <dir> must
 contain a web-deployer.yml file.
@@ -22,17 +22,19 @@ deployed.
 
   web-deployer deploy <dir> <version>
 `
+	deployError = errors.New("Could not complete deploy.")
+)
 
 type deployRunner struct {
 	dir        string
 	app        string
 	version    string
 	k8sProject string
-	out        io.Writer
+	logger     logrus.FieldLogger
 }
 
-func newDeployCmd(out io.Writer) *cobra.Command {
-	runner := &deployRunner{out: out}
+func newDeployCmd(logger logrus.FieldLogger) *cobra.Command {
+	runner := &deployRunner{logger: logger}
 
 	cmd := &cobra.Command{
 		Use:          "deploy <app> <version>",
@@ -41,7 +43,8 @@ func newDeployCmd(out io.Writer) *cobra.Command {
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 2 {
-				return errors.New("you must pass <app> and <version>")
+				runner.logger.Error("you must pass <app> and <version>")
+				return deployError
 			}
 
 			dir, err := os.Getwd()
@@ -53,11 +56,7 @@ func newDeployCmd(out io.Writer) *cobra.Command {
 			runner.app = args[0]
 			runner.version = args[1]
 
-			err = runner.run()
-			if err != nil {
-				fmt.Fprintf(runner.out, "\n")
-			}
-			return err
+			return runner.run()
 		},
 	}
 
@@ -67,25 +66,29 @@ func newDeployCmd(out io.Writer) *cobra.Command {
 func (runner *deployRunner) run() error {
 	cfg, err := config.Discover(runner.dir)
 	if err != nil {
-		return fmt.Errorf("Could not discover web-deployer.yml in %s", runner.dir)
+		runner.logger.Errorf("Could not discover web-deployer.yml in %s", runner.dir)
+		return deployError
 	}
 
 	appCfg, appIsDefined := cfg.Apps[runner.app]
 	if appIsDefined == false {
-		return fmt.Errorf("Did not find `%s` app defined in web-deployer.yml", runner.app)
+		runner.logger.Errorf("Did not find `%s` app defined in web-deployer.yml", runner.app)
+		return deployError
 	}
 
 	if len(cfg.Kubernetes.Project) == 0 {
-		return errors.New("Please specify a Kubernetes project in your web-deployer.yml")
+		runner.logger.Error("Please specify a Kubernetes project in your web-deployer.yml")
+		return deployError
 	}
 
-	fmt.Fprintf(runner.out, "Deploying...")
+	runner.logger.Info("Deploying...")
 
-	err = deploy.NewDeployer().Deploy(cfg.Kubernetes.Project, appCfg.Name, runner.version, runner.dir)
+	err = deploy.NewDeployer().Deploy(cfg.Kubernetes.Project, cfg.Kubernetes.Cluster, appCfg.Name, runner.version, runner.dir, appCfg.Hosts)
 	if err != nil {
-		return err
+		runner.logger.Error(err)
+		return deployError
 	}
 
-	fmt.Fprintf(runner.out, " done.")
+	runner.logger.Info("Deploy complete.")
 	return nil
 }

@@ -1,7 +1,7 @@
 package publish
 
 import (
-  "fmt"
+	"fmt"
 	"strings"
 )
 
@@ -38,28 +38,28 @@ func (g *versionGateway) LoadClusterCredentials(cluster string) error {
 }
 
 func (g *versionGateway) Exists(project string, name string, version string) (bool, error) {
-  repo := repo(project, name)
+	repo := repo(project, name)
 	out, err := runExecutableAndReturnOutput("gcloud", "container", "images", "list-tags", repo, "--filter", version, "--format", "json")
 	return strings.TrimSpace(string(out)) != "[]", err
 }
 
 func (g *versionGateway) Push(project string, name string, version string, dir string) error {
-  fullyQualifiedRepo := fullyQualifiedRepo(project, name, version)
-  err := build(fullyQualifiedRepo, dir)
+	fullyQualifiedRepo := fullyQualifiedRepo(project, name, version)
+	err := build(fullyQualifiedRepo, dir)
 
-  if err != nil {
-    return err
-  }
+	if err != nil {
+		return err
+	}
 
 	return runExecutable("gcloud", "docker", "--", "push", fullyQualifiedRepo)
 }
 
 func repo(project string, name string) string {
-  return fmt.Sprintf("gcr.io/%s/%s", project, name)
+	return fmt.Sprintf("gcr.io/%s/%s", project, name)
 }
 
 func fullyQualifiedRepo(project string, name string, version string) string {
-  return fmt.Sprintf("gcr.io/%s/%s:%s", project, name, version)
+	return fmt.Sprintf("gcr.io/%s/%s:%s", project, name, version)
 }
 
 func build(fullyQualifiedRepo string, dir string) error {
