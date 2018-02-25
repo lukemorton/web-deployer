@@ -3,8 +3,14 @@ build:
 	go install github.com/lukemorton/web-deployer/cmd/web-deployer
 
 test: build
-	exec $(GOPATH)/bin/web-deployer
-	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer publish staging v1
+	go test ./...
+	# exec $(GOPATH)/bin/web-deployer
+
+test_publish: build
+	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer publish staging $(VERSION)
+
+test_deploy: build
+	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer deploy staging $(VERSION)
 
 charts/dist:
 	mkdir -p charts/dist
