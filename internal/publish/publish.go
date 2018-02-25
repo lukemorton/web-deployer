@@ -3,7 +3,7 @@ package publish
 import (
 	"fmt"
 
-	"github.com/lukemorton/web-deployer/internal/logger"
+	"github.com/lukemorton/web-deployer/internal/log"
 )
 
 type Publisher interface {
@@ -11,11 +11,11 @@ type Publisher interface {
 }
 
 type publisher struct {
-	logger         logger.Logger
+	logger         log.Logger
 	versionGateway VersionGateway
 }
 
-func NewPublisher(logger logger.Logger) *publisher {
+func NewPublisher(logger log.Logger) *publisher {
 	return &publisher{
 		logger,
 		&versionGateway{logger},
@@ -51,6 +51,7 @@ func (p *publisher) validateVersionDoesntExist(project string, name string, vers
 	exists, err := p.versionGateway.Exists(project, name, version)
 
 	if err != nil {
+		p.logger.Debugf("Error: %v", err)
 		return err
 	}
 
@@ -63,6 +64,6 @@ func (p *publisher) validateVersionDoesntExist(project string, name string, vers
 }
 
 func (p *publisher) push(project string, name string, version string, dir string) (err error) {
-	p.logger.Info("Publishing version...")
+	p.logger.Info("Pushing version...")
 	return p.versionGateway.Push(project, name, version, dir)
 }

@@ -7,10 +7,10 @@ test: build
 	# exec $(GOPATH)/bin/web-deployer
 
 test_publish: build
-	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer publish staging $(VERSION)
+	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer publish --verbose staging $(VERSION)
 
 test_deploy: build
-	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer deploy staging $(VERSION)
+	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer deploy --verbose staging $(VERSION)
 
 charts/dist:
 	mkdir -p charts/dist

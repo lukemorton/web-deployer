@@ -1,10 +1,13 @@
 package main
 
 import (
+	"io"
 	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"github.com/lukemorton/web-deployer/internal/log"
 )
 
 var globalUsage = `Web Deployer for Kubernetes.
@@ -27,8 +30,16 @@ var (
 	verbose = false
 )
 
+type logger struct {
+	*logrus.Logger
+}
+
+func (l *logger) Writer() *io.PipeWriter {
+	return logger.WriterLevel(*l, logrus.DebugLevel)
+}
+
 func newRootCmd(args []string) *cobra.Command {
-	logger := logrus.New()
+	logger := &logger{logrus.New()}
 
 	cmd := &cobra.Command{
 		Use:          "web-deployer",
@@ -36,14 +47,14 @@ func newRootCmd(args []string) *cobra.Command {
 		Long:         globalUsage,
 		SilenceUsage: true,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			logger.Formatter = &log.LogrusTextFormatter{}
 			logger.Out = cmd.OutOrStdout()
 
 			if verbose {
-				logger.Info("Setting logger level to debug...")
 				logger.Level = logrus.DebugLevel
-			} else {
-				logger.Info("Using logger level %s...", logger.Level)
 			}
+
+			logger.Debugf("Using logger level %s...", logger.Level)
 		},
 	}
 

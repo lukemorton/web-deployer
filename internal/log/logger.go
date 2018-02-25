@@ -1,4 +1,8 @@
-package logger
+package log
+
+import (
+	"io"
+)
 
 type Logger interface {
 	Debugf(format string, args ...interface{})
@@ -18,4 +22,6 @@ type Logger interface {
 	Error(args ...interface{})
 	Fatal(args ...interface{})
 	Panic(args ...interface{})
+
+	Writer() *io.PipeWriter
 }

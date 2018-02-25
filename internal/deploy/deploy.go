@@ -1,7 +1,7 @@
 package deploy
 
 import (
-	"github.com/lukemorton/web-deployer/internal/logger"
+	"github.com/lukemorton/web-deployer/internal/log"
 	"github.com/lukemorton/web-deployer/internal/publish"
 )
 
@@ -10,7 +10,7 @@ type deployer struct {
 	versionGateway VersionGateway
 }
 
-func NewDeployer(logger logger.Logger) *deployer {
+func NewDeployer(logger log.Logger) *deployer {
 	return &deployer{
 		publisher: publish.NewPublisher(logger),
 	}

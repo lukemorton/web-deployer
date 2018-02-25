@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/lukemorton/web-deployer/internal/config"
-	"github.com/lukemorton/web-deployer/internal/logger"
+	"github.com/lukemorton/web-deployer/internal/log"
 	"github.com/lukemorton/web-deployer/internal/publish"
 )
 
@@ -28,10 +28,10 @@ type publishRunner struct {
 	app        string
 	version    string
 	k8sProject string
-	logger     logger.Logger
+	logger     log.Logger
 }
 
-func newPublishCmd(logger logger.Logger) *cobra.Command {
+func newPublishCmd(logger log.Logger) *cobra.Command {
 	runner := &publishRunner{logger: logger}
 
 	cmd := &cobra.Command{
@@ -71,12 +71,12 @@ func (runner *publishRunner) run() error {
 
 	appCfg, appIsDefined := cfg.Apps[runner.app]
 	if appIsDefined == false {
-		runner.logger.Infof("Did not find `%s` app defined in web-deployer.yml", runner.app)
+		runner.logger.Errorf("Did not find `%s` app defined in web-deployer.yml", runner.app)
 		return publishError
 	}
 
 	if len(cfg.Kubernetes.Project) == 0 {
-		runner.logger.Infof("Please specify a Kubernetes project in your web-deployer.yml")
+		runner.logger.Errorf("Please specify a Kubernetes project in your web-deployer.yml")
 		return publishError
 	}
 

@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/lukemorton/web-deployer/internal/config"
-	"github.com/lukemorton/web-deployer/internal/logger"
+	"github.com/lukemorton/web-deployer/internal/log"
 	"github.com/lukemorton/web-deployer/internal/deploy"
 )
 
@@ -30,10 +30,10 @@ type deployRunner struct {
 	app        string
 	version    string
 	k8sProject string
-	logger     logger.Logger
+	logger     log.Logger
 }
 
-func newDeployCmd(logger logger.Logger) *cobra.Command {
+func newDeployCmd(logger log.Logger) *cobra.Command {
 	runner := &deployRunner{logger: logger}
 
 	cmd := &cobra.Command{
