@@ -4,10 +4,10 @@ import (
 	"errors"
 	"os"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/lukemorton/web-deployer/internal/config"
+	"github.com/lukemorton/web-deployer/internal/logger"
 	"github.com/lukemorton/web-deployer/internal/deploy"
 )
 
@@ -30,10 +30,10 @@ type deployRunner struct {
 	app        string
 	version    string
 	k8sProject string
-	logger     logrus.FieldLogger
+	logger     logger.Logger
 }
 
-func newDeployCmd(logger logrus.FieldLogger) *cobra.Command {
+func newDeployCmd(logger logger.Logger) *cobra.Command {
 	runner := &deployRunner{logger: logger}
 
 	cmd := &cobra.Command{
@@ -83,7 +83,7 @@ func (runner *deployRunner) run() error {
 
 	runner.logger.Info("Deploying...")
 
-	err = deploy.NewDeployer().Deploy(cfg.Kubernetes.Project, cfg.Kubernetes.Cluster, appCfg.Name, runner.version, runner.dir, appCfg.Hosts)
+	err = deploy.NewDeployer(runner.logger).Deploy(cfg.Kubernetes.Project, cfg.Kubernetes.Cluster, appCfg.Name, runner.version, runner.dir, appCfg.Hosts)
 	if err != nil {
 		runner.logger.Error(err)
 		return deployError

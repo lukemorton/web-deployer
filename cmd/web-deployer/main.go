@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -29,14 +28,24 @@ var (
 )
 
 func newRootCmd(args []string) *cobra.Command {
+	logger := logrus.New()
+
 	cmd := &cobra.Command{
 		Use:          "web-deployer",
 		Short:        "Web Deployer for Kubernetes.",
 		Long:         globalUsage,
 		SilenceUsage: true,
-	}
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			logger.Out = cmd.OutOrStdout()
 
-	logger := createLogger(cmd.OutOrStdout())
+			if verbose {
+				logger.Info("Setting logger level to debug...")
+				logger.Level = logrus.DebugLevel
+			} else {
+				logger.Info("Using logger level %s...", logger.Level)
+			}
+		},
+	}
 
 	cmd.AddCommand(
 		newPublishCmd(logger),
@@ -52,15 +61,4 @@ func main() {
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)
 	}
-}
-
-func createLogger(out io.Writer) logrus.FieldLogger {
-	log := logrus.New()
-	log.Out = out
-
-	if verbose {
-		log.Level = logrus.DebugLevel
-	}
-
-	return log
 }

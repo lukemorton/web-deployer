@@ -4,10 +4,10 @@ import (
 	"errors"
 	"os"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
 	"github.com/lukemorton/web-deployer/internal/config"
+	"github.com/lukemorton/web-deployer/internal/logger"
 	"github.com/lukemorton/web-deployer/internal/publish"
 )
 
@@ -28,10 +28,10 @@ type publishRunner struct {
 	app        string
 	version    string
 	k8sProject string
-	logger     logrus.FieldLogger
+	logger     logger.Logger
 }
 
-func newPublishCmd(logger logrus.FieldLogger) *cobra.Command {
+func newPublishCmd(logger logger.Logger) *cobra.Command {
 	runner := &publishRunner{logger: logger}
 
 	cmd := &cobra.Command{
@@ -82,9 +82,9 @@ func (runner *publishRunner) run() error {
 
 	runner.logger.Info("Publishing...")
 
-	err = publish.NewPublisher().Publish(cfg.Kubernetes.Project, appCfg.Name, runner.version, runner.dir)
+	err = publish.NewPublisher(runner.logger).Publish(cfg.Kubernetes.Project, appCfg.Name, runner.version, runner.dir)
 	if err != nil {
-		return err
+		return publishError
 	}
 
 	runner.logger.Info("Publishing complete.")

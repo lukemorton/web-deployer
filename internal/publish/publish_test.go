@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	 "github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,6 +52,7 @@ func TestPublishHandlesPushImageError(t *testing.T) {
 }
 
 func mockedPublisher() (*publisher, *mockVersionGateway) {
+  logger, _ := test.NewNullLogger()
 	versionGateway := &mockVersionGateway{}
-	return &publisher{versionGateway}, versionGateway
+	return &publisher{logger: logger, versionGateway: versionGateway}, versionGateway
 }
