@@ -16,6 +16,7 @@ Before getting started ensure you have activated a service account for
 Kubernetes and have gotten credentials for a cluster.
 
 	gcloud auth activate-service-account --key-file gcp-key.json
+	gcloud auth configure-docker
 	gcloud container clusters get-credentials --project $(PROJECT) --zone europe-west2-a $(CLUSTER)
 
 One day we'll do this all for you, but not today!
