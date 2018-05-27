@@ -11,3 +11,6 @@ run: build
 
 publish: build
 	docker push $(IMAGE)
+
+clean:
+	rm -rf dist
