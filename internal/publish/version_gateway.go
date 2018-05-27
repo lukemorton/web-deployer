@@ -57,7 +57,7 @@ func (g *versionGateway) Push(project string, name string, version string, dir s
 	}
 
 	g.logger.Debugf("Pushing %s...", fullyQualifiedRepo)
-	return runExecutable(g.logger.Writer(), "gcloud", "docker", "--", "push", fullyQualifiedRepo)
+	return runExecutable(g.logger.Writer(), "docker", "push", fullyQualifiedRepo)
 }
 
 func (g *versionGateway) build(fullyQualifiedRepo string, dir string) error {
