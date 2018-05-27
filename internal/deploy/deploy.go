@@ -15,7 +15,7 @@ func NewDeployer(logger log.Logger) *deployer {
 	return &deployer{
 		logger: logger,
 		publisher: publish.NewPublisher(logger),
-		versionGateway: &mockVersionGateway{},
+		versionGateway: &versionGateway{logger},
 	}
 }
 
@@ -47,9 +47,15 @@ func (d *deployer) validateExecutablesExist() error {
 	return d.versionGateway.EnsureInstalled()
 }
 
-func (d *deployer) versionExists(project string, name string, version string) (bool, error) {
+func (d *deployer) versionExists(project string, name string, version string) (exists bool, err error) {
 	d.logger.Info("Deciding whether to publish...")
-	return d.versionGateway.Exists(project, name, version)
+	exists, err = d.versionGateway.Exists(project, name, version)
+
+	if exists {
+		d.logger.Info("Already published...")
+	}
+
+	return
 }
 
 func (d *deployer) publish(project string, name string, version string, dir string) error {
