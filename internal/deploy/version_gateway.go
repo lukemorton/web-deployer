@@ -25,7 +25,7 @@ func (g *versionGateway) Exists(project string, name string, version string) (bo
 
 	repo := repo(project, name)
 	g.logger.Debugf("Looking for %s version in %s...", version, repo)
-	out, err := runExecutableAndReturnOutput("gcloud", "container", "images", "list-tags", repo, "--filter", version, "--format", "json")
+	out, err := runExecutableAndReturnOutput(g.logger.Writer(), "gcloud", "container", "images", "list-tags", repo, "--filter", version, "--format", "json")
 	g.logger.Debugf("Versions found: %s", out)
 	return strings.TrimSpace(string(out)) != "[]", err
 }
@@ -37,17 +37,17 @@ func (g *versionGateway) Deploy(project string, cluster string, name string, ver
 		return err
 	}
 
-	err = loadClusterCredentials(cluster)
+	err = g.loadClusterCredentials(cluster)
 	if err != nil {
 		return err
 	}
 
-	err = helmInit()
+	err = g.helmInit()
 	if err != nil {
 		return err
 	}
 
-	return helmUpgrade(project, name, version, hosts)
+	return g.helmUpgrade(project, name, version, hosts)
 }
 
 func (g *versionGateway) ensureInstalled() (err error) {
@@ -66,17 +66,18 @@ func (g *versionGateway) ensureInstalled() (err error) {
 	return nil
 }
 
-func loadClusterCredentials(cluster string) error {
-	return runExecutable("gcloud", "container", "clusters", "get-credentials", cluster)
+func (g *versionGateway) loadClusterCredentials(cluster string) error {
+	return runExecutable(g.logger.Writer(), "gcloud", "container", "clusters", "get-credentials", cluster)
 }
 
-func helmInit() error {
-	return runExecutable("helm", "init", "--client-only")
+func (g *versionGateway) helmInit() error {
+	return runExecutable(g.logger.Writer(), "helm", "init", "--client-only")
 }
 
-func helmUpgrade(project string, name string, version string, hosts []string) error {
+func (g *versionGateway) helmUpgrade(project string, name string, version string, hosts []string) error {
 	repo := repo(project, name)
 	return runExecutable(
+		g.logger.Writer(),
 		"helm",
 		"upgrade",
 		name,
