@@ -12,3 +12,4 @@ RUN apk add --update make docker && \
 
 COPY --from=s2i /usr/local/bin/s2i /usr/local/bin/
 COPY --from=lachlanevenson/k8s-helm /usr/local/bin/helm /usr/local/bin/
+ADD dist/web-deployer /usr/local/bin/
