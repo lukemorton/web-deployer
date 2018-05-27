@@ -10,7 +10,6 @@ import (
 
 func TestPublishingSuccessfully(t *testing.T) {
 	publisher, versionGateway := mockedPublisher()
-	versionGateway.On("EnsureInstalled").Return(nil)
 	versionGateway.On("Exists", "project", "app-staging", "v1").Return(false, nil)
 	versionGateway.On("Push", "project", "app-staging", "v1", ".").Return(nil)
 
@@ -22,7 +21,7 @@ func TestPublishingSuccessfully(t *testing.T) {
 func TestPublishHandlesNotInstalled(t *testing.T) {
 	publisher, versionGateway := mockedPublisher()
 	s2iNotInstalledError := errors.New("s2i not installed")
-	versionGateway.On("EnsureInstalled").Return(s2iNotInstalledError)
+	versionGateway.On("Exists", "project", "app-staging", "v1").Return(false, s2iNotInstalledError)
 
 	assert.Equal(t, s2iNotInstalledError, publisher.Publish("project", "app-staging", "v1", "."))
 
@@ -31,7 +30,6 @@ func TestPublishHandlesNotInstalled(t *testing.T) {
 
 func TestPublishHandlesExistingTags(t *testing.T) {
 	publisher, versionGateway := mockedPublisher()
-	versionGateway.On("EnsureInstalled").Return(nil)
 	versionGateway.On("Exists", "project", "app-staging", "v1").Return(true, nil)
 
 	assert.Error(t, publisher.Publish("project", "app-staging", "v1", "."))
@@ -41,7 +39,6 @@ func TestPublishHandlesExistingTags(t *testing.T) {
 
 func TestPublishHandlesPushImageError(t *testing.T) {
 	publisher, versionGateway := mockedPublisher()
-	versionGateway.On("EnsureInstalled").Return(nil)
 	versionGateway.On("Exists", "project", "app-staging", "v1").Return(false, nil)
 	pushError := errors.New("failed to push")
 	versionGateway.On("Push", "project", "app-staging", "v1", ".").Return(pushError)

@@ -8,7 +8,6 @@ import (
 )
 
 type VersionGateway interface {
-	EnsureInstalled() error
 	Exists(project string, name string, version string) (bool, error)
 	Push(project string, name string, version string, dir string) error
 }
@@ -17,7 +16,40 @@ type versionGateway struct {
 	logger log.Logger
 }
 
-func (g *versionGateway) EnsureInstalled() (err error) {
+func (g *versionGateway) Exists(project string, name string, version string) (bool, error) {
+	err := g.ensureInstalled()
+
+	if err != nil {
+		return false, err
+	}
+
+	repo := repo(project, name)
+	g.logger.Debugf("Looking for %s version in %s...", version, repo)
+	out, err := runExecutableAndReturnOutput(g.logger.Writer(), "gcloud", "container", "images", "list-tags", repo, "--filter", version, "--format", "json")
+	g.logger.Debugf("Versions found: %s", out)
+	return strings.TrimSpace(string(out)) != "[]", err
+}
+
+func (g *versionGateway) Push(project string, name string, version string, dir string) error {
+	err := g.ensureInstalled()
+
+	if err != nil {
+		return err
+	}
+
+	fullyQualifiedRepo := fullyQualifiedRepo(project, name, version)
+	g.logger.Debugf("Building %s as %s...", dir, fullyQualifiedRepo)
+	err = g.build(fullyQualifiedRepo, dir)
+
+	if err != nil {
+		return err
+	}
+
+	g.logger.Debugf("Pushing %s...", fullyQualifiedRepo)
+	return runExecutable(g.logger.Writer(), "docker", "push", fullyQualifiedRepo)
+}
+
+func (g *versionGateway) ensureInstalled() (err error) {
 	g.logger.Debug("Looking for docker executable...")
 	err = ensureExecutableInstalled("docker")
 	if err != nil {
@@ -37,27 +69,6 @@ func (g *versionGateway) EnsureInstalled() (err error) {
 	}
 
 	return nil
-}
-
-func (g *versionGateway) Exists(project string, name string, version string) (bool, error) {
-	repo := repo(project, name)
-	g.logger.Debugf("Looking for %s version in %s...", version, repo)
-	out, err := runExecutableAndReturnOutput(g.logger.Writer(), "gcloud", "container", "images", "list-tags", repo, "--filter", version, "--format", "json")
-	g.logger.Debugf("Versions found: %s", out)
-	return strings.TrimSpace(string(out)) != "[]", err
-}
-
-func (g *versionGateway) Push(project string, name string, version string, dir string) error {
-	fullyQualifiedRepo := fullyQualifiedRepo(project, name, version)
-	g.logger.Debugf("Building %s as %s...", dir, fullyQualifiedRepo)
-	err := g.build(fullyQualifiedRepo, dir)
-
-	if err != nil {
-		return err
-	}
-
-	g.logger.Debugf("Pushing %s...", fullyQualifiedRepo)
-	return runExecutable(g.logger.Writer(), "docker", "push", fullyQualifiedRepo)
 }
 
 func (g *versionGateway) build(fullyQualifiedRepo string, dir string) error {

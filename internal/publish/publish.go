@@ -23,11 +23,6 @@ func NewPublisher(logger log.Logger) *publisher {
 }
 
 func (p *publisher) Publish(project string, name string, version string, dir string) (err error) {
-	err = p.validateExecutablesExist()
-	if err != nil {
-		return err
-	}
-
 	err = p.validateVersionDoesntExist(project, name, version)
 	if err != nil {
 		return err
@@ -39,11 +34,6 @@ func (p *publisher) Publish(project string, name string, version string, dir str
 	}
 
 	return nil
-}
-
-func (p *publisher) validateExecutablesExist() error {
-	p.logger.Info("Ensuring executables exist...")
-	return p.versionGateway.EnsureInstalled()
 }
 
 func (p *publisher) validateVersionDoesntExist(project string, name string, version string) error {
