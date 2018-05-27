@@ -27,9 +27,8 @@ deployed.
 
 type deployRunner struct {
 	dir        string
-	app        string
+	deployment string
 	version    string
-	k8sProject string
 	logger     log.Logger
 }
 
@@ -37,13 +36,13 @@ func newDeployCmd(logger log.Logger) *cobra.Command {
 	runner := &deployRunner{logger: logger}
 
 	cmd := &cobra.Command{
-		Use:          "deploy <app> <version>",
+		Use:          "deploy <deployment> <version>",
 		Short:        "Deploy a version of your application.",
 		Long:         deployUsage,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 2 {
-				runner.logger.Error("you must pass <app> and <version>")
+				runner.logger.Error("you must pass <deployment> and <version>")
 				return deployError
 			}
 
@@ -53,7 +52,7 @@ func newDeployCmd(logger log.Logger) *cobra.Command {
 			}
 
 			runner.dir = dir
-			runner.app = args[0]
+			runner.deployment = args[0]
 			runner.version = args[1]
 
 			return runner.run()
@@ -70,9 +69,9 @@ func (runner *deployRunner) run() error {
 		return deployError
 	}
 
-	deployment, deploymentIsDefined := cfg.Deployments[runner.app]
+	deployment, deploymentIsDefined := cfg.Deployments[runner.deployment]
 	if deploymentIsDefined == false {
-		runner.logger.Errorf("Did not find `%s` deployment defined in web-deployer.yml", runner.app)
+		runner.logger.Errorf("Did not find `%s` deployment defined in web-deployer.yml", runner.deployment)
 		return deployError
 	}
 

@@ -14,10 +14,10 @@ import (
 var (
 	publishUsage = `Publish a version of your application.
 
-In order to push your image to gcr.io run the following command. <dir> must
+In order to push your image to gcr.io run the following command. <deployment> must
 contain a web-deployer.yml file.
 
-  web-deployer publish <dir> <version>
+  web-deployer publish <deployment> <version>
 `
 
 	publishError = errors.New("Could not complete publishing.")
@@ -25,9 +25,8 @@ contain a web-deployer.yml file.
 
 type publishRunner struct {
 	dir        string
-	app        string
+	deployment string
 	version    string
-	k8sProject string
 	logger     log.Logger
 }
 
@@ -35,13 +34,13 @@ func newPublishCmd(logger log.Logger) *cobra.Command {
 	runner := &publishRunner{logger: logger}
 
 	cmd := &cobra.Command{
-		Use:          "publish <app> <version>",
+		Use:          "publish <deployment> <version>",
 		Short:        "Publish a version of your application.",
 		Long:         publishUsage,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) != 2 {
-				logger.Error("you must pass <app> and <version>")
+				logger.Error("you must pass <deployment> and <version>")
 				return publishError
 			}
 
@@ -52,7 +51,7 @@ func newPublishCmd(logger log.Logger) *cobra.Command {
 			}
 
 			runner.dir = dir
-			runner.app = args[0]
+			runner.deployment = args[0]
 			runner.version = args[1]
 
 			return runner.run()
@@ -69,9 +68,9 @@ func (runner *publishRunner) run() error {
 		return publishError
 	}
 
-	deployment, deploymentIsDefined := cfg.Deployments[runner.app]
+	deployment, deploymentIsDefined := cfg.Deployments[runner.deployment]
 	if deploymentIsDefined == false {
-		runner.logger.Errorf("Did not find `%s` deployment defined in web-deployer.yml", runner.app)
+		runner.logger.Errorf("Did not find `%s` deployment defined in web-deployer.yml", runner.deployment)
 		return publishError
 	}
 
