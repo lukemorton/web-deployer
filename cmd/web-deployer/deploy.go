@@ -70,20 +70,20 @@ func (runner *deployRunner) run() error {
 		return deployError
 	}
 
-	appCfg, appIsDefined := cfg.Apps[runner.app]
-	if appIsDefined == false {
-		runner.logger.Errorf("Did not find `%s` app defined in web-deployer.yml", runner.app)
+	deployment, deploymentIsDefined := cfg.Deployments[runner.app]
+	if deploymentIsDefined == false {
+		runner.logger.Errorf("Did not find `%s` deployment defined in web-deployer.yml", runner.app)
 		return deployError
 	}
 
-	if len(cfg.Kubernetes.Project) == 0 {
-		runner.logger.Error("Please specify a Kubernetes project in your web-deployer.yml")
+	if len(cfg.GCloud.Project) == 0 {
+		runner.logger.Error("Please specify a GCloud project in your web-deployer.yml")
 		return deployError
 	}
 
 	runner.logger.Info("Deploying...")
 
-	err = deploy.NewDeployer(runner.logger).Deploy(cfg.Kubernetes.Project, cfg.Kubernetes.Zone, cfg.Kubernetes.Cluster, appCfg.Name, runner.version, runner.dir, appCfg.Hosts)
+	err = deploy.NewDeployer(runner.logger).Deploy(cfg.GCloud.Project, cfg.GCloud.Zone, cfg.GCloud.Cluster, deployment.Name, runner.version, runner.dir, deployment.Hosts)
 	if err != nil {
 		runner.logger.Error(err)
 		return deployError

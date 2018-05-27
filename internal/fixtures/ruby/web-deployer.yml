@@ -1,9 +1,9 @@
-k8s:
+gcloud:
   project: doorman-1200
   zone: europe-west2-a
   cluster: ruby-sample-app-cluster
 
-apps:
+deployments:
   staging:
     name: ruby-sample-app-staging
     hosts:

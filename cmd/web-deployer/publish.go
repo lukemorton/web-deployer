@@ -69,20 +69,20 @@ func (runner *publishRunner) run() error {
 		return publishError
 	}
 
-	appCfg, appIsDefined := cfg.Apps[runner.app]
-	if appIsDefined == false {
-		runner.logger.Errorf("Did not find `%s` app defined in web-deployer.yml", runner.app)
+	deployment, deploymentIsDefined := cfg.Deployments[runner.app]
+	if deploymentIsDefined == false {
+		runner.logger.Errorf("Did not find `%s` deployment defined in web-deployer.yml", runner.app)
 		return publishError
 	}
 
-	if len(cfg.Kubernetes.Project) == 0 {
-		runner.logger.Errorf("Please specify a Kubernetes project in your web-deployer.yml")
+	if len(cfg.GCloud.Project) == 0 {
+		runner.logger.Errorf("Please specify a GCloud project in your web-deployer.yml")
 		return publishError
 	}
 
 	runner.logger.Info("Publishing...")
 
-	err = publish.NewPublisher(runner.logger).Publish(cfg.Kubernetes.Project, appCfg.Name, runner.version, runner.dir)
+	err = publish.NewPublisher(runner.logger).Publish(cfg.GCloud.Project, deployment.Name, runner.version, runner.dir)
 	if err != nil {
 		return publishError
 	}

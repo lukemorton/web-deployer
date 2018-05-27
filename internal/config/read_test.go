@@ -7,8 +7,8 @@ import (
 
 func TestParsingConfig(t *testing.T) {
 	yaml := `
-    k8s: { project: "cool" }
-    apps:
+    gcloud: { project: "cool" }
+    deployments:
       staging:
         name: cool-staging
         charts:
@@ -20,10 +20,10 @@ func TestParsingConfig(t *testing.T) {
 	config, err := Read([]byte(yaml))
 
 	assert.NoError(t, err)
-	assert.Equal(t, "cool", config.Kubernetes.Project)
-	assert.Equal(t, "cool-staging", config.Apps["staging"].Name)
-	assert.Equal(t, "staging.cool.com", config.Apps["staging"].Hosts[0])
-	assert.Equal(t, "staging", config.Apps["staging"].Charts[0]["gcloud-sqlproxy"]["cloudsql.instance"])
+	assert.Equal(t, "cool", config.GCloud.Project)
+	assert.Equal(t, "cool-staging", config.Deployments["staging"].Name)
+	assert.Equal(t, "staging.cool.com", config.Deployments["staging"].Hosts[0])
+	assert.Equal(t, "staging", config.Deployments["staging"].Charts[0]["gcloud-sqlproxy"]["cloudsql.instance"])
 }
 
 func TestParsingKeyThatDoesNotExist(t *testing.T) {

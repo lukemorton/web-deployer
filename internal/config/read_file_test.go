@@ -9,7 +9,7 @@ func TestReadingFile(t *testing.T) {
 	config, err := ReadFile("../fixtures/ruby/web-deployer.yml")
 
 	assert.NoError(t, err)
-	assert.Equal(t, "doorman-1200", config.Kubernetes.Project)
+	assert.Equal(t, "doorman-1200", config.GCloud.Project)
 }
 
 func TestNonExistentReadingFile(t *testing.T) {
