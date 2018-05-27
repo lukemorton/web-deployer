@@ -83,7 +83,7 @@ func (runner *deployRunner) run() error {
 
 	runner.logger.Info("Deploying...")
 
-	err = deploy.NewDeployer(runner.logger).Deploy(cfg.Kubernetes.Project, cfg.Kubernetes.Cluster, appCfg.Name, runner.version, runner.dir, appCfg.Hosts)
+	err = deploy.NewDeployer(runner.logger).Deploy(cfg.Kubernetes.Project, cfg.Kubernetes.Zone, cfg.Kubernetes.Cluster, appCfg.Name, runner.version, runner.dir, appCfg.Hosts)
 	if err != nil {
 		runner.logger.Error(err)
 		return deployError

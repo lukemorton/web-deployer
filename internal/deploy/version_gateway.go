@@ -9,7 +9,7 @@ import (
 
 type VersionGateway interface {
 	Exists(project string, name string, version string) (bool, error)
-	Deploy(project string, cluster string, name string, version string, hosts []string) error
+	Deploy(project string, zone string, cluster string, name string, version string, hosts []string) error
 }
 
 type versionGateway struct {
@@ -30,14 +30,14 @@ func (g *versionGateway) Exists(project string, name string, version string) (bo
 	return strings.TrimSpace(string(out)) != "[]", err
 }
 
-func (g *versionGateway) Deploy(project string, cluster string, name string, version string, hosts []string) (err error) {
+func (g *versionGateway) Deploy(project string, zone string, cluster string, name string, version string, hosts []string) (err error) {
 	err = g.ensureInstalled()
 
 	if err != nil {
 		return err
 	}
 
-	err = g.loadClusterCredentials(cluster)
+	err = g.loadClusterCredentials(project, zone, cluster)
 	if err != nil {
 		return err
 	}
@@ -66,8 +66,8 @@ func (g *versionGateway) ensureInstalled() (err error) {
 	return nil
 }
 
-func (g *versionGateway) loadClusterCredentials(cluster string) error {
-	return runExecutable(g.logger.Writer(), "gcloud", "container", "clusters", "get-credentials", cluster)
+func (g *versionGateway) loadClusterCredentials(project string, zone string, cluster string) error {
+	return runExecutable(g.logger.Writer(), "gcloud", "container", "clusters", "get-credentials", "--project", project, "--zone", zone, cluster)
 }
 
 func (g *versionGateway) helmInit() error {

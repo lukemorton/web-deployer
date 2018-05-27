@@ -19,7 +19,7 @@ func NewDeployer(logger log.Logger) *deployer {
 	}
 }
 
-func (d *deployer) Deploy(project string, cluster string, name string, version string, dir string, hosts []string) (err error) {
+func (d *deployer) Deploy(project string, zone string, cluster string, name string, version string, dir string, hosts []string) (err error) {
 	versionExists, err := d.versionExists(project, name, version)
 
 	if err != nil {
@@ -34,7 +34,7 @@ func (d *deployer) Deploy(project string, cluster string, name string, version s
 		}
 	}
 
-	return d.deploy(project, cluster, name, version, hosts)
+	return d.deploy(project, zone, cluster, name, version, hosts)
 }
 
 func (d *deployer) versionExists(project string, name string, version string) (exists bool, err error) {
@@ -52,7 +52,7 @@ func (d *deployer) publish(project string, name string, version string, dir stri
 	return d.publisher.Publish(project, name, version, dir)
 }
 
-func (d *deployer) deploy(project string, cluster string, name string, version string, hosts []string) error {
+func (d *deployer) deploy(project string, zone string, cluster string, name string, version string, hosts []string) error {
 	d.logger.Info("Deploying version...")
-	return d.versionGateway.Deploy(project, cluster, name, version, hosts)
+	return d.versionGateway.Deploy(project, zone, cluster, name, version, hosts)
 }

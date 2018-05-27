@@ -11,9 +11,9 @@ func TestDeployingAndPublishingVersionSuccessfully(t *testing.T) {
 	deployer, publisher, versionGateway := mockedDeployer()
 	versionGateway.On("Exists", "project", "app-staging", "v1").Return(false, nil)
 	publisher.On("Publish", "project", "app-staging", "v1", ".").Return(nil)
-	versionGateway.On("Deploy", "project", "cluster", "app-staging", "v1", []string{"cool.com"}).Return(nil)
+	versionGateway.On("Deploy", "project", "zone", "cluster", "app-staging", "v1", []string{"cool.com"}).Return(nil)
 
-	assert.NoError(t, deployer.Deploy("project", "cluster", "app-staging", "v1", ".", []string{"cool.com"}))
+	assert.NoError(t, deployer.Deploy("project", "zone", "cluster", "app-staging", "v1", ".", []string{"cool.com"}))
 
 	versionGateway.AssertExpectations(t)
 	publisher.AssertExpectations(t)
@@ -22,9 +22,9 @@ func TestDeployingAndPublishingVersionSuccessfully(t *testing.T) {
 func TestDeployingPublishedVersionSuccessfully(t *testing.T) {
 	deployer, publisher, versionGateway := mockedDeployer()
 	versionGateway.On("Exists", "project", "app-staging", "v1").Return(true, nil)
-	versionGateway.On("Deploy", "project", "cluster", "app-staging", "v1", []string{"cool.com"}).Return(nil)
+	versionGateway.On("Deploy", "project", "zone", "cluster", "app-staging", "v1", []string{"cool.com"}).Return(nil)
 
-	assert.NoError(t, deployer.Deploy("project", "cluster", "app-staging", "v1", ".", []string{"cool.com"}))
+	assert.NoError(t, deployer.Deploy("project", "zone", "cluster", "app-staging", "v1", ".", []string{"cool.com"}))
 
 	versionGateway.AssertExpectations(t)
 	publisher.AssertExpectations(t)
