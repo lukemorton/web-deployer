@@ -9,7 +9,6 @@ import (
 
 func TestDeployingAndPublishingVersionSuccessfully(t *testing.T) {
 	deployer, publisher, versionGateway := mockedDeployer()
-	versionGateway.On("EnsureInstalled").Return(nil)
 	versionGateway.On("Exists", "project", "app-staging", "v1").Return(false, nil)
 	publisher.On("Publish", "project", "app-staging", "v1", ".").Return(nil)
 	versionGateway.On("Deploy", "project", "cluster", "app-staging", "v1", []string{"cool.com"}).Return(nil)
@@ -22,7 +21,6 @@ func TestDeployingAndPublishingVersionSuccessfully(t *testing.T) {
 
 func TestDeployingPublishedVersionSuccessfully(t *testing.T) {
 	deployer, publisher, versionGateway := mockedDeployer()
-	versionGateway.On("EnsureInstalled").Return(nil)
 	versionGateway.On("Exists", "project", "app-staging", "v1").Return(true, nil)
 	versionGateway.On("Deploy", "project", "cluster", "app-staging", "v1", []string{"cool.com"}).Return(nil)
 

@@ -20,11 +20,6 @@ func NewDeployer(logger log.Logger) *deployer {
 }
 
 func (d *deployer) Deploy(project string, cluster string, name string, version string, dir string, hosts []string) (err error) {
-	err = d.validateExecutablesExist()
-	if err != nil {
-		return err
-	}
-
 	versionExists, err := d.versionExists(project, name, version)
 
 	if err != nil {
@@ -40,11 +35,6 @@ func (d *deployer) Deploy(project string, cluster string, name string, version s
 	}
 
 	return d.deploy(project, cluster, name, version, hosts)
-}
-
-func (d *deployer) validateExecutablesExist() error {
-	d.logger.Info("Ensuring executables exist...")
-	return d.versionGateway.EnsureInstalled()
 }
 
 func (d *deployer) versionExists(project string, name string, version string) (exists bool, err error) {

@@ -8,7 +8,6 @@ import (
 )
 
 type VersionGateway interface {
-	EnsureInstalled() error
 	Exists(project string, name string, version string) (bool, error)
 	Deploy(project string, cluster string, name string, version string, hosts []string) error
 }
@@ -17,7 +16,41 @@ type versionGateway struct {
 	logger log.Logger
 }
 
-func (g *versionGateway) EnsureInstalled() (err error) {
+func (g *versionGateway) Exists(project string, name string, version string) (bool, error) {
+	err := g.ensureInstalled()
+
+	if err != nil {
+		return false, err
+	}
+
+	repo := repo(project, name)
+	g.logger.Debugf("Looking for %s version in %s...", version, repo)
+	out, err := runExecutableAndReturnOutput("gcloud", "container", "images", "list-tags", repo, "--filter", version, "--format", "json")
+	g.logger.Debugf("Versions found: %s", out)
+	return strings.TrimSpace(string(out)) != "[]", err
+}
+
+func (g *versionGateway) Deploy(project string, cluster string, name string, version string, hosts []string) (err error) {
+	err = g.ensureInstalled()
+
+	if err != nil {
+		return err
+	}
+
+	err = loadClusterCredentials(cluster)
+	if err != nil {
+		return err
+	}
+
+	err = helmInit()
+	if err != nil {
+		return err
+	}
+
+	return helmUpgrade(project, name, version, hosts)
+}
+
+func (g *versionGateway) ensureInstalled() (err error) {
 	g.logger.Debug("Looking for gcloud executable...")
 	err = ensureExecutableInstalled("gcloud")
 	if err != nil {
@@ -31,26 +64,6 @@ func (g *versionGateway) EnsureInstalled() (err error) {
 	}
 
 	return nil
-}
-
-func (g *versionGateway) Exists(project string, name string, version string) (bool, error) {
-	repo := repo(project, name)
-	out, err := runExecutableAndReturnOutput("gcloud", "container", "images", "list-tags", repo, "--filter", version, "--format", "json")
-	return strings.TrimSpace(string(out)) != "[]", err
-}
-
-func (g *versionGateway) Deploy(project string, cluster string, name string, version string, hosts []string) (err error) {
-	err = loadClusterCredentials(cluster)
-	if err != nil {
-		return err
-	}
-
-	err = helmInit()
-	if err != nil {
-		return err
-	}
-
-	return helmUpgrade(project, name, version, hosts)
 }
 
 func loadClusterCredentials(cluster string) error {
