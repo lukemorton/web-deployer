@@ -6,11 +6,17 @@ test: build
 	go test ./...
 	# exec $(GOPATH)/bin/web-deployer
 
-test_publish: build
+test_publish_ruby: build
 	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer publish --verbose staging $(VERSION)
 
-test_deploy: build
+test_deploy_ruby: build
 	cd internal/fixtures/ruby && exec $(GOPATH)/bin/web-deployer deploy --verbose staging $(VERSION)
+
+test_publish_dotnet: build
+	cd internal/fixtures/dotnet && exec $(GOPATH)/bin/web-deployer publish --verbose staging $(VERSION)
+
+test_deploy_dotnet: build
+	cd internal/fixtures/dotnet && exec $(GOPATH)/bin/web-deployer deploy --verbose staging $(VERSION)
 
 charts/dist:
 	mkdir -p charts/dist

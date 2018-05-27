@@ -1,0 +1,20 @@
+gcloud:
+  project: doorman-1200
+  zone: europe-west2-a
+  cluster: ruby-sample-app-cluster
+
+deployments:
+  staging:
+    name: dotnet-app-staging
+    hosts:
+      - dotnet-app-staging.local
+    charts:
+      - gcloud-sqlproxy:
+          cloudsql.instance: staging
+  production:
+    name: dotnet-app-production
+    hosts:
+      - dotnet-app-production.local
+    charts:
+      - gcloud-sqlproxy:
+          cloudsql.instance: production

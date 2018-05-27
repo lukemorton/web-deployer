@@ -1,7 +1,9 @@
 package publish
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/lukemorton/web-deployer/internal/log"
@@ -72,7 +74,33 @@ func (g *versionGateway) ensureInstalled() (err error) {
 }
 
 func (g *versionGateway) build(fullyQualifiedRepo string, dir string) error {
-	return runExecutable(g.logger.Writer(), "s2i", "build", dir, "centos/ruby-24-centos7", fullyQualifiedRepo)
+	image, err := g.detect(dir)
+
+	if err != nil {
+		return err
+	}
+
+	return runExecutable(g.logger.Writer(), "s2i", "build", dir, image, fullyQualifiedRepo)
+}
+
+func (g *versionGateway) detect(dir string) (string, error) {
+	files, err := ioutil.ReadDir(dir)
+
+	if err != nil {
+		return "", nil
+	}
+
+	for _, file := range files {
+		g.logger.Debug(file.Name())
+
+		if file.Name() == "config.ru" {
+			return "centos/ruby-24-centos7", nil
+		} else if strings.Contains(file.Name(), ".csproj") {
+			return "registry.centos.org/dotnet/dotnet-20-centos7", nil
+		}
+	}
+
+	return "", errors.New("Could not detect")
 }
 
 func repo(project string, name string) string {

@@ -4,9 +4,10 @@ For deploying a conventional web application to a conventional destination. Thin
 
 ## Supported deployments => platforms
 
-We currently support a single use case: deploying a ruby application to Google Kubernetes Engine.
+We currently only support deploying to Google Kubernetes Engine platform. We will add additional target platforms in future such as AWS as well as more deployment applications.
 
 - ✅ Ruby Rack application => Google Kubernetes Engine
+- ✅ .NET application => Google Kubernetes Engine
 - ❌ Node.js application => Google Kubernetes Engine
 - ❌ Python application => Google Kubernetes Engine
 - ❌ PHP application => Google Kubernetes Engine
