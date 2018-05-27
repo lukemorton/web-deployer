@@ -5,7 +5,7 @@ RUN apk add --update wget && \
   tar -xf source-to-image-v1.1.8-e3140d01-linux-386.tar.gz && \
   mv s2i /usr/local/bin
 
-FROM google/cloud-sdk:alpine
+FROM google/cloud-sdk:198.0.0-alpine
 
 RUN apk add --update make docker && \
     gcloud components install kubectl
