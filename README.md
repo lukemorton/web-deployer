@@ -2,9 +2,14 @@
 
 For deploying a conventional web application to a conventional destination. Think of it as a convention over configuration approach to deployments.
 
-## Supported platforms
+## Supported deployments => platforms
 
 We currently support a single use case: deploying a ruby application to Google Kubernetes Engine.
+
+- ✅ Ruby Rack application => Google Kubernetes Engine
+- ❌ Node.js application => Google Kubernetes Engine
+- ❌ Python application => Google Kubernetes Engine
+- ❌ PHP application => Google Kubernetes Engine
 
 ## Installation
 
