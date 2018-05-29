@@ -1,13 +1,9 @@
-all: gcloud/login gcloud/create-cluster kubectl/helm-service-account helm/init
+IMAGE := lukemorton/web-deployer-tools
 
-gcloud/login:
-	gcloud auth login
-
-gcloud/create-cluster:
-	gcloud container clusters create --project $(PROJECT) --zone $(ZONE) $(CLUSTER)
-
-kubectl/helm-service-account:
-	kubectl create -f helm-service-account.yml
-
-helm/init:
-	helm init --service-account helm
+all:
+	docker run \
+		--rm \
+		-v `pwd`:/creator \
+		-it \
+		$(IMAGE) \
+		bash /creator/create_cluster.sh $(PROJECT) $(ZONE) $(CLUSTER)
