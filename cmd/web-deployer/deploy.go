@@ -20,7 +20,7 @@ contain a web-deployer.yml file.
 If the version has not already been published, it will be published before it is
 deployed.
 
-  web-deployer deploy <dir> <version>
+  web-deployer deploy <deployment> <version>
 `
 	deployError = errors.New("Could not complete deploy.")
 )
